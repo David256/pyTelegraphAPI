@@ -1,6 +1,8 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
+from pytelegraph import logger
+
 '''Define los diferentes tipos de datos que telegraph procesa.'''
 
 class Element:
@@ -16,6 +18,7 @@ class Element:
 		:param dictionary: diccionario con datos necesarios.
 		'''
 		for k,v in dictionary.items():
+			logger.info('Importando [%s]:%s' % (k,v))
 			self.__dict__[k] = v
 	
 	def __str__(self):
