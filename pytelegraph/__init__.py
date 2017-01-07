@@ -75,10 +75,53 @@ class Telegraph:
 		:param author_name: nombre a mostrar del autor.
 		:param author_url: URL del perfil del autor.
 		:param content: lista de objetos `Node`, ver http://telegra.ph/api#Node
-		:param return_content: toma valor `True`, es `False` por defecto.
+		:param return_content: toma valor `True` para retornar un objeto `Page`. Es `False` por defecto.
 		'''
 		pass
 
 	def edit_page(self, access_token, path, title, content, author_name, author_url, return_content=False):
 		'''Permite editar un artículo existente.
+
+		Al terminar, retorna un objeto `Page`.
+
+		:param access_token: token de acceso a la cuenta de telegraph.
+		:param path: ruta del artículo.
+		:param title: título del artículo.
+		:param content: contenido del artículo, lista de `Node`, ver http://telegra.ph/api#Node
+		:param author_name: nombre del autor, se mostrará bajo el título del artículo.
+		:param author_url: URL del perfil del autor.
+		:param return_content: toma valor `True` para retornar un objeto `Page`. Es `False` por defecto.
 		'''
+		pass
+
+	def get_page(self, path, return_content=False):
+		'''Retorna un objeto `Page` con la página solicitada.
+
+		:param path: ruta del artículo.
+		:param return_content: toma valor `True` para retornar un objeto `Page`. Es `False` por defecto.
+		'''
+		pass
+
+	def get_page_list(self, access_token, offset=0, limit=50):
+		'''Permite obtener una lista de páginas de dicha cuenta.
+
+		Retorna una lista, ordenada por orden de creación, perteneciente
+		a la cuenta de Telegraph. Lo retorna mediante un objeto
+		`PageList`.
+
+		:param access_token: token de acceso a la cuenta de telegraph.
+		:param offset: número secuencial de la primera página a devolver.
+		:param limit: limites de página a devolver.
+		'''
+		pass
+
+	def get_views(self, path, year, month, day, hour):
+		'''Retorna el número de vistas de una página en un tiempo específico.
+
+		:param path: ruta del artículo.
+		:param year: entero que indica el año para buscar.
+		:param month: entero que indica el mes para buscar.
+		:param day: entero que indica el día para buscar.
+		:param hour: entero que indica la hora para buscar.
+		'''
+		pass
