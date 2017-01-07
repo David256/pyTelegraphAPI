@@ -3,6 +3,7 @@
 
 import requests
 import json
+from pytelegraph import logger
 
 URL = 'https://api.telegra.ph/'
 
@@ -17,6 +18,7 @@ class ErrorWorker(Exception):
 def exchange(method, *args, **kwargs):
 	'''Procesa las peticiones recibidas y retorna datos.
 	'''
+	logger.info('Recibiendo datos para intercambiar: %s' % kwargs)
 	info_web = requests.get('%s/%s' % (URL, method), params=kwargs)
 	content = info_web.content.decode('utf-8')
 	if info_web.status_code == 404:
@@ -29,4 +31,5 @@ def exchange(method, *args, **kwargs):
 def exchange_path(method, path, *args, **kwargs):
 	'''Redirige los datos recibidos al método exchange().
 	'''
+	logger.info('Redirigiendo de exchange_path() a exchange()')
 	exchange('%s/%s' % (method, path), *args, **kwargs)
