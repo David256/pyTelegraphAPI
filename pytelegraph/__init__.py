@@ -10,7 +10,7 @@ console_output_handler.setFormatter(
 	logging.Formatter('%(asctime)s (%(filename)s:%(lineno)d) %(levelname)s - %(name)s: "%(message)s"')
 )
 logger.addHandler(console_output_handler)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 
 import pytelegraph.elements as elements
 import pytelegraph.worker as worker
@@ -18,7 +18,7 @@ import pytelegraph.worker as worker
 class Telegraph:
 	
 	def __init__(self):
-		self.access_token = None
+		pass
 
 	def create_account(self, short_name, author_name, author_url):
 		'''Crea una cuenta nueva en Telegraph.
@@ -41,7 +41,7 @@ class Telegraph:
 			new_account = elements.Account(None,None,None)
 			new_account.to_import(dictionary)
 			return new_account
-		except Exception as e:
+		except worker.ErrorWorker as e:
 			logger.error('No puedo crear la cuenta nueva [%s]: %s' % (e.function, e.result))
 			raise e
 
@@ -138,7 +138,7 @@ class Telegraph:
 		'''
 		pass
 
-	def get_views(self, path, year, month, day, hour):
+	def get_views(self, path, year=None, month=None, day=None, hour=None):
 		'''Retorna el número de vistas de una página en un tiempo específico.
 
 		:param path: ruta del artículo.
@@ -147,4 +147,18 @@ class Telegraph:
 		:param day: entero que indica el día para buscar.
 		:param hour: entero que indica la hora para buscar.
 		'''
-		pass
+		try:
+			dictionary = worker.exchange_path(
+				method='getViews',
+				path=path,
+				year=year,
+				month=month,
+				day=day,
+				hour=hour
+			)
+			new_views = elements.PageViews(0)
+			new_views.to_import(dictionary)
+			return new_views
+		except worker.ErrorWorker as e:
+			logger.error('No puedo obtener las vistas [%s]: %s' % (e.function, e.result))
+			raise e
