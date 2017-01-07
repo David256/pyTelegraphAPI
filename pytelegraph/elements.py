@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
+import json
 from pytelegraph import logger
 
 '''Define los diferentes tipos de datos que telegraph procesa.'''
@@ -28,7 +29,7 @@ class Element:
 		for k,v in self.__dict__.items():
 			if v != None:
 				new_dict[k] = v
-		return str(new_dict)
+		return json.dumps(new_dict)
 
 class Account(Element):
 
@@ -71,7 +72,7 @@ class PageViews(Element):
 
 class Page(Element):
 
-	def __init__(self, path, url, title, description, author_name=None, auth_url=None, image_url=None, content=[], views=0, can_edit=None):
+	def __init__(self, path, url, title, description, author_name=None, author_url=None, image_url=None, content=[], views=0, can_edit=None):
 		'''Inicializa un objeto Page, propio de un artículo.
 
 		:param path: ruta de la página.
