@@ -22,7 +22,10 @@ def exchange(method, *args, **kwargs):
 	params = {}
 	for k,v in kwargs.items():
 		if v != None:
-			params[k] = v
+			if isinstance(v, tuple) or isinstance(v, list):
+				params[k] = json.dumps(v)
+			else:
+				params[k] = v
 	info_web = requests.get('%s/%s' % (URL, method), params=params)
 	content = info_web.content.decode('utf-8')
 	if info_web.status_code == 404:
