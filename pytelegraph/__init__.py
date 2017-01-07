@@ -1,8 +1,19 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-import pytelegraph.elements
-import pytelegraph.worker
+import sys
+import logging
+
+logger = logging.getLogger('Telegraph')
+console_output_handler = logging.StreamHandler(sys.stderr)
+console_output_handler.setFormatter(
+	logging.Formatter('%(asctime)s (%(filename)s:%(lineno)d) %(levelname)s - %(name)s: "%(message)s"')
+)
+logger.addHandler(console_output_handler)
+logger.setLevel(logging.DEBUG)
+
+import pytelegraph.elements as elements
+import pytelegraph.worker as worker
 
 class Telegraph:
 	
@@ -20,7 +31,19 @@ class Telegraph:
 		:param author_name: nombre usado en cada artículo.
 		:param author_url: URL que hace referencia al autor.
 		'''
-		pass
+		try:
+			dictionary = worker.exchange(
+				method='createAccount',
+				short_name=short_name,
+				author_name=author_name,
+				author_url=author_url
+			)
+			new_account = elements.Account(None,None,None)
+			new_account.to_import(dictionary)
+			return new_account
+		except Exception as e:
+			logger.error('No puedo crear la cuenta nueva [%s]: %s' % (e.function, e.result))
+			raise e
 
 	def edit_account_info(self, access_token, short_name=None, author_name=None, author_url=None):
 		'''Edita la información de una cuenta.
