@@ -100,7 +100,22 @@ class Telegraph:
 		:param content: lista de objetos `Node`, ver http://telegra.ph/api#Node
 		:param return_content: toma valor `True` para retornar un objeto `Page`. Es `False` por defecto.
 		'''
-		pass
+		try:
+			dictionary = worker.exchange(
+				method='createPage',
+				access_token=access_token,
+				title=title,
+				author_name=author_name,
+				author_url=author_url,
+				content=content,
+				return_content=return_content
+			)
+			new_page = elements.Page(None,None,None,None)
+			new_page.to_import(dictionary)
+			return new_page
+		except worker.ErrorWorker as e:
+			logger.error('No puedo obtener las vistas [%s]: %s' % (e.function, e.result))
+			raise e
 
 	def edit_page(self, access_token, path, title, content, author_name, author_url, return_content=False):
 		'''Permite editar un artículo existente.
