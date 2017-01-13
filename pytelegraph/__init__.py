@@ -84,7 +84,17 @@ class Telegraph:
 
 		:param access_token: token antigua de la cuenta de telegraph.
 		'''
-		pass
+		try:
+			dictionary = worker.exchange(
+				method='revokeAccessToken',
+				access_token=access_token
+			)
+			new_token = dictionary['access_token']
+			new_auth_url = dictionary['auth_url']
+			return (new_token, new_auth_url)
+		except worker.ErrorWorker as e:
+			logger.error('No puedo revocar token [%s]: %s' % (e.function, e.result))
+			raise e
 
 	def create_page(self, access_token, title, author_name, author_url, content, return_content=False):
 		'''Crea una nueva página/artículo.
