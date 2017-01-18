@@ -58,7 +58,20 @@ class Telegraph:
 		:param author_name: si es definido, cambiamos el author_name.
 		:param author_url: si es definido, cambiamos el author_url.
 		'''
-		pass
+		try:
+			dictionary = worker.exchange(
+				method='editAccountInfo',
+				access_token=access_token,
+				short_name=short_name,
+				author_name=author_name,
+				author_url=author_url
+			)
+			new_edited_account = elements.Account(None,None,None)
+			new_edited_account.to_import(dictionary)
+			return new_edited_account
+		except worker.ErrorWorker as e:
+			logger.error('No puedo editar la cuenta nueva [%s]: %s' % (e.function, e.result))
+			raise e
 
 	def get_account_info(self, access_token, fields):
 		'''Obtiene información de la cuenta.
