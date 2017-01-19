@@ -20,7 +20,7 @@ class Telegraph:
 	def __init__(self):
 		pass
 
-	def create_account(self, short_name, author_name, author_url):
+	def create_account(self, short_name, author_name, author_url='https://telegra.ph/api'):
 		'''Crea una cuenta nueva en Telegraph.
 
 		Con este método podéis crear un cuenta nueva. Será
@@ -78,8 +78,12 @@ class Telegraph:
 
 		Este método'permite obtener información de dicha cuenta.
 		Para este, tenéis que especificar en la tupla `fields` el
-		campo requerido. Los campos disponibles son: short_name,
-		author_name, author_url, auth_url, page_count.
+		campo requerido. Los campos disponibles son:
+		- short_name
+		- author_name
+		- author_url
+		- auth_url
+		- page_count
 
 		:param access_token: token de acceso a la cuenta de telegraph.
 		:param fields: tupla que contiene una lista de string con los campos requeridos.
