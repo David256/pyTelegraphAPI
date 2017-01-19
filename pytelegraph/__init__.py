@@ -178,7 +178,22 @@ class Telegraph:
 		:param offset: número secuencial de la primera página a devolver.
 		:param limit: limites de página a devolver.
 		'''
-		pass
+		try:
+			dictionary = worker.exchange(
+				method='getPageList',
+				access_token=access_token,
+				offset=offset,
+				limit=limit
+			)
+			new_page_list = elements.PageList(**dictionary)
+			#new_page_list = elements.PageList(
+			#	total_count=dictionary['total_count'],
+			#	pages=dictionary['pages']
+			#)
+			return new_page_list
+		except worker.ErrorWorker as e:
+			logger.error('No puedo obtener la lista de páginas [%s]: %s' % (e.function, e.result))
+			raise e
 
 	def get_views(self, path, year=None, month=None, day=None, hour=None):
 		'''Retorna el número de vistas de una página en un tiempo específico.
