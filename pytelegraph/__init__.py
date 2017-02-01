@@ -165,7 +165,18 @@ class Telegraph:
 		:param path: ruta del artículo.
 		:param return_content: toma valor `True` para retornar un objeto `Page`. Es `False` por defecto.
 		'''
-		pass
+		try:
+			dictionary = worker.exchange_path(
+				method='getPage',
+				path=path,
+				return_content=return_content
+			)
+			new_got_page = elements.Page(None,None,None,None)
+			new_got_page.to_import(dictionary)
+			return new_got_page
+		except worker.ErrorWorker as e:
+			logger.error('No puedo obtener una página [%s]: %s' % (e.function, e.result))
+			raise e
 
 	def get_page_list(self, access_token, offset=0, limit=50):
 		'''Permite obtener una lista de páginas de dicha cuenta.
