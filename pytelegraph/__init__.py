@@ -169,7 +169,23 @@ class Telegraph:
 		:param author_url: URL del perfil del autor.
 		:param return_content: toma valor `True` para retornar un objeto `Page`. Es `False` por defecto.
 		'''
-		pass
+		try:
+			dictionary = worker.exchange_path(
+				method='editPage',
+				path=path,
+				access_token=access_token,
+				title=title,
+				content=content,
+				author_name=author_name,
+				author_url=author_url,
+				return_content=return_content
+			)
+			new_edited_page = elements.Page(None,None,None,None)
+			new_edited_page.to_import(dictionary)
+			return new_edited_page
+		except worker.ErrorWorker as e:
+			logger.error('No puedo editar esa página [%s]: %s' % (e.function, e.result))
+			raise e
 
 	def get_page(self, path, return_content=False):
 		'''Retorna un objeto `Page` con la página solicitada.
