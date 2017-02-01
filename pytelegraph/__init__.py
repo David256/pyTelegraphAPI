@@ -92,7 +92,18 @@ class Telegraph:
 		Ejemplo:
 		>>> get_account_info(access_token=..., fields=('auth_url', 'page_count'))
 		'''
-		pass
+		try:
+			dictionary = worker.exchange(
+				method='getAccountInfo',
+				access_token=access_token,
+				fields=fields
+			)
+			new_got_account = elements.Account(None,None,None)
+			new_got_account.to_import(dictionary)
+			return new_got_account
+		except worker.ErrorWorker as e:
+			logger.error('No puedo obtener la información de esta cuenta [%s]: %s' % (e.function, e.result))
+			raise e
 
 	def revoke_access_token(self, access_token):
 		'''Cambia el token de una cuenta de Telegraph.
