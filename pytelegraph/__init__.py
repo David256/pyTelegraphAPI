@@ -73,12 +73,13 @@ class Telegraph:
 			logger.error('No puedo editar la cuenta nueva [%s]: %s' % (e.function, e.result))
 			raise e
 
-	def get_account_info(self, access_token, fields):
+	def get_account_info(self, access_token, fields=['short_name', 'author_name', 'author_url']):
 		'''Obtiene información de la cuenta.
 
-		Este método'permite obtener información de dicha cuenta.
-		Para este, tenéis que especificar en la tupla `fields` el
-		campo requerido. Los campos disponibles son:
+		Este método permite obtener información de dicha cuenta.
+		Para esto, tenéis que especificar en la tupla `fields` el
+		campo requerido o los campos requerido. Los campos
+		disponibles son:
 		- short_name
 		- author_name
 		- author_url
