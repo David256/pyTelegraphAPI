@@ -16,9 +16,16 @@ import pytelegraph.elements as elements
 import pytelegraph.worker as worker
 
 class Telegraph:
+	'''La clase *Telegraph* define un objeto telegraph con los métodos
+	necesarios para un fácil manejo y administración de publicación minimalista
+	en https://telegra.ph
+
+	Para acceder a la documentación de Telegraph,
+	ir al [sitio oficial de Telegraph](https://telegra.ph/api)
+	'''
 	
 	def __init__(self):
-		pass
+		self.access_token = None
 
 	def create_account(self, short_name, author_name, author_url='https://telegra.ph/api'):
 		'''Crea una cuenta nueva en Telegraph.
@@ -39,6 +46,7 @@ class Telegraph:
 				author_url=author_url
 			)
 			new_account = elements.Account(None,None,None)
+			self.access_token = new_account.access_token
 			new_account.to_import(dictionary)
 			return new_account
 		except worker.ErrorWorker as e:
