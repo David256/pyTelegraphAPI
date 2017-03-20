@@ -46,8 +46,8 @@ class Telegraph:
 				author_url=author_url
 			)
 			new_account = elements.Account(None,None,None)
-			self.access_token = new_account.access_token
 			new_account.to_import(dictionary)
+			self.access_token = new_account.access_token
 			return new_account
 		except worker.ErrorWorker as e:
 			logger.error('No puedo crear la cuenta nueva [%s]: %s' % (e.function, e.result))
