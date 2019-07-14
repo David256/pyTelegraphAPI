@@ -50,6 +50,7 @@ class Telegraph:
 		]
 		try:
 			account = elements.Account.new_empty()
+			account.access_token = access_token
 			dictionary = worker.exchange(
 				method="getAccountInfo",
 				access_token=access_token,
@@ -63,29 +64,63 @@ class Telegraph:
 			logger.error("Error %s" % e)
 			raise e
 
-	def create_account(self, short_name, author_name, author_url="https://telegra.ph/api"):
+	@classmethod
+	def new_from_new_account(cls, short_name, author_name, author_url=None):
 		"""Crea una cuenta nueva en Telegraph.
 
 		Con este método podéis crear un cuenta nueva. Será
-		retorndo un objeto `Account`, el cual tendrá también
-		un `access_token`: útil para realizar cambios futuros.
+		retorndo un objeto `Telegraph`.
 
 		:param short_name: corto nombre usado para la identificación interna.
 		:param author_name: nombre usado en cada artículo.
 		:param author_url: URL que hace referencia al autor.
 		"""
+		account = elements.Account.new_empty()
 		try:
 			dictionary = worker.exchange(
 				method="createAccount",
 				short_name=short_name,
 				author_name=author_name,
-				author_url=author_url
-			)
-			self.account.to_import(dictionary)
-			return self.account
+				author_url=author_url or "https://telegra.ph/api")
+			account.to_import(dictionary)
+			return cls(account)
 		except worker.ErrorWorker as e:
 			logger.error("No puedo crear la cuenta nueva [%s]: %s" % (e.function, e.result))
 			raise e
+
+	@property
+	def short_name(self):
+		return self.account.short_name
+
+	@property
+	def author_name(self):
+		return self.account.author_name
+
+	@property
+	def author_url(self):
+		return self.account.author_url
+
+	@property
+	def auth_url(self):
+		self.get_account_info()
+		return self.account.auth_url
+
+	@property
+	def page_count(self):
+		self.get_account_info()
+		return self.account.page_count
+
+	@short_name.setter
+	def short_name(self, value):
+		self.edit_account_info(short_name=value)
+
+	@author_name.setter
+	def author_name(self, value):
+		self.edit_account_info(author_name=value)
+
+	@author_url.setter
+	def author_url(self, value):
+		self.edit_account_info(author_url=value)
 
 	def edit_account_info(self, short_name=None, author_name=None, author_url=None):
 		"""Edita la información de una cuenta.
@@ -110,40 +145,28 @@ class Telegraph:
 				access_token=self.account.access_token,
 				short_name=short_name,
 				author_name=author_name,
-				author_url=author_url
-			)
+				author_url=author_url)
 			self.account.to_import(dictionary)
 			return self.account
 		except worker.ErrorWorker as e:
 			logger.error("No puedo editar la cuenta nueva [%s]: %s" % (e.function, e.result))
 			raise e
 
-	def get_account_info(self, fields=["short_name", "author_name", "author_url"]):
+	def get_account_info(self):
 		"""obtiene información de la cuenta.
 
 		Este método permite obtener información de dicha cuenta.
-		Para esto, tenéis que especificar en la tupla `fields`
-		los campos requeridos. Los campos disponibles son:
-		- short_name
-		- author_name
-		- author_url
-		- auth_url
-		- page_count
-
-		:param fields: tupla que contiene una lista de string con los campos requeridos.
-
-		Ejemplo:
-		>>> get_account_info(fields=("auth_url", "page_count"))
+		Al llamarse, actualiza el objeto `account` y lo retorna.
 		"""
 		if self.account.access_token is None:
 			logger.warning("El access_token es nulo.")
 			return None
+		fields = ("short_name", "author_name", "author_url", "auth_url", "page_count")
 		try:
 			dictionary = worker.exchange(
 				method="getAccountInfo",
 				access_token=self.account.access_token,
-				fields=fields
-			)
+				fields=fields)
 			self.account.to_import(dictionary)
 			return self.account
 		except worker.ErrorWorker as e:
@@ -163,8 +186,7 @@ class Telegraph:
 		try:
 			dictionary = worker.exchange(
 				method="revokeAccessToken",
-				access_token=sefl.account.access_token
-			)
+				access_token=sefl.account.access_token)
 			new_token = dictionary["access_token"]
 			new_auth_url = dictionary["auth_url"]
 			self.account.access_token = new_token
@@ -198,8 +220,7 @@ class Telegraph:
 				author_name=author_name,
 				author_url=author_url,
 				content=content,
-				return_content=return_content
-			)
+				return_content=return_content)
 			new_page = elements.Page.new_empty()
 			new_page.to_import(dictionary)
 			return new_page
@@ -231,9 +252,8 @@ class Telegraph:
 				content=content,
 				author_name=author_name,
 				author_url=author_url,
-				return_content=return_content
-			)
-			new_edited_page = elements.Page(None,None,None,None)
+				return_content=return_content)
+			new_edited_page = elements.Page.new_empty()
 			new_edited_page.to_import(dictionary)
 			return new_edited_page
 		except worker.ErrorWorker as e:
@@ -250,9 +270,8 @@ class Telegraph:
 			dictionary = worker.exchange_path(
 				method="getPage",
 				path=path,
-				return_content=return_content
-			)
-			new_got_page = elements.Page(None,None,None,None)
+				return_content=return_content)
+			new_got_page = elements.Page.new_empty()
 			new_got_page.to_import(dictionary)
 			return new_got_page
 		except worker.ErrorWorker as e:
@@ -277,8 +296,7 @@ class Telegraph:
 				method="getPageList",
 				access_token=self.account.access_token,
 				offset=offset,
-				limit=limit
-			)
+				limit=limit)
 			new_page_list = elements.PageList(**dictionary)
 			return new_page_list
 		except worker.ErrorWorker as e:
@@ -301,8 +319,7 @@ class Telegraph:
 				year=year,
 				month=month,
 				day=day,
-				hour=hour
-			)
+				hour=hour)
 			new_views = elements.PageViews(0)
 			new_views.to_import(dictionary)
 			return new_views
