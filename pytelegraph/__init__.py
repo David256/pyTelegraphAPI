@@ -16,7 +16,7 @@ logger.addHandler(console_output_handler)
 logger.setLevel(logging.INFO)
 
 
-import pytelegraph.elements as elements
+import pytelegraph.element as element
 import pytelegraph.worker as worker
 
 class Telegraph:
@@ -49,7 +49,7 @@ class Telegraph:
 			"author_name", "author_url"
 		]
 		try:
-			account = elements.Account.new_empty()
+			account = element.Account.new_empty()
 			account.access_token = access_token
 			dictionary = worker.exchange(
 				method="getAccountInfo",
@@ -75,7 +75,7 @@ class Telegraph:
 		:param author_name: nombre usado en cada artículo.
 		:param author_url: URL que hace referencia al autor.
 		"""
-		account = elements.Account.new_empty()
+		account = element.Account.new_empty()
 		try:
 			dictionary = worker.exchange(
 				method="createAccount",
@@ -221,7 +221,7 @@ class Telegraph:
 				author_url=author_url,
 				content=content,
 				return_content=return_content)
-			new_page = elements.Page.new_empty()
+			new_page = element.Page.new_empty()
 			new_page.to_import(dictionary)
 			return new_page
 		except worker.ErrorWorker as e:
@@ -253,7 +253,7 @@ class Telegraph:
 				author_name=author_name,
 				author_url=author_url,
 				return_content=return_content)
-			new_edited_page = elements.Page.new_empty()
+			new_edited_page = element.Page.new_empty()
 			new_edited_page.to_import(dictionary)
 			return new_edited_page
 		except worker.ErrorWorker as e:
@@ -271,7 +271,7 @@ class Telegraph:
 				method="getPage",
 				path=path,
 				return_content=return_content)
-			new_got_page = elements.Page.new_empty()
+			new_got_page = element.Page.new_empty()
 			new_got_page.to_import(dictionary)
 			return new_got_page
 		except worker.ErrorWorker as e:
@@ -297,7 +297,7 @@ class Telegraph:
 				access_token=self.account.access_token,
 				offset=offset,
 				limit=limit)
-			new_page_list = elements.PageList(**dictionary)
+			new_page_list = element.PageList(**dictionary)
 			return new_page_list
 		except worker.ErrorWorker as e:
 			logger.error("No puedo obtener la lista de páginas [%s]: %s" % (e.function, e.result))
@@ -320,7 +320,7 @@ class Telegraph:
 				month=month,
 				day=day,
 				hour=hour)
-			new_views = elements.PageViews(0)
+			new_views = element.PageViews(0)
 			new_views.to_import(dictionary)
 			return new_views
 		except worker.ErrorWorker as e:
