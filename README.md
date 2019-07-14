@@ -19,9 +19,9 @@ my_telegraph = pytelegram.Telegraph()
 Para crear una cuenta nueva:
 ```python
 my_telegraph.create_account(
-    short_name='Daniela',
-    author_name='Daniela Peralta',
-    author_url='https://t.me/DanielaPeralta' # Espero que nadie, ahora, se cree esta cuenta y me toque cambiar este ejemplo :v
+    short_name="Daniela",
+    author_name="Daniela Peralta",
+    author_url="https://t.me/DanielaPeralta" # Espero que nadie, ahora, se cree esta cuenta y me toque cambiar este ejemplo :v
 )
 
 # listo, ahora en los futuros métodos, cuando necesitéis el `access_token`,
