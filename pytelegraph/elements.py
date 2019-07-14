@@ -20,7 +20,7 @@ class Element:
 		'''
 		for k,v in dictionary.items():
 			logger.info('Importando [%s]:%s' % (k,v))
-			self.__dict__[k] = v
+			setattr(self, k, v)
 	
 	def __str__(self):
 		'''Exporta los datos como un diccionario.
@@ -49,6 +49,10 @@ class Account(Element):
 		self.access_token = access_token
 		self.auth_url = auth_url
 		self.page_count = page_count
+
+	@classmethod
+	def new_empty(cls):
+		return cls("", "", "")
 
 class PageList(Element):
 

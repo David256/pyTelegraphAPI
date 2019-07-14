@@ -23,9 +23,27 @@ class Telegraph:
 	Para acceder a la documentación de Telegraph,
 	ir al [sitio oficial de Telegraph](https://telegra.ph/api)
 	'''
-	
-	def __init__(self):
-		self.access_token = None
+
+	def __init__(self, account):
+		self.account = account
+
+	@classmethod
+	def new_from_token(cls, access_token):
+		fields = ['short_name','author_name','author_url','auth_url','page_count','short_name','author_name','author_url']
+		try:
+			account = elements.Account.new_empty()
+			dictionary = worker.exchange(
+				method='getAccountInfo',
+				access_token=access_token,
+				fields=fields)
+			account.to_import(dictionary)
+			return cls(account)
+		except worker.ErrorWorker as e:
+			logger.critical('No puedo obtener la información de esta cuenta [%s]: %s' % (e.function, e.result))
+			raise e
+		except Exception as e:
+			logger.error('Error %s' % e)
+			raise e
 
 	def create_account(self, short_name, author_name, author_url='https://telegra.ph/api'):
 		'''Crea una cuenta nueva en Telegraph.
@@ -45,15 +63,13 @@ class Telegraph:
 				author_name=author_name,
 				author_url=author_url
 			)
-			new_account = elements.Account(None,None,None)
-			new_account.to_import(dictionary)
-			self.access_token = new_account.access_token
-			return new_account
+			self.account.to_import(dictionary)
+			return self.account
 		except worker.ErrorWorker as e:
 			logger.error('No puedo crear la cuenta nueva [%s]: %s' % (e.function, e.result))
 			raise e
 
-	def edit_account_info(self, access_token, short_name=None, author_name=None, author_url=None):
+	def edit_account_info(self, short_name=None, author_name=None, author_url=None):
 		'''Edita la información de una cuenta.
 
 		Con este método podéis editar la información de un
@@ -61,27 +77,28 @@ class Telegraph:
 		`None` no serán enviados, por eso, sólo los valores
 		recibidos serán editados.
 
-		:param access_token: token de acceso a la cuenta de telegraph.
 		:param short_name: si es definido, cambiamos el short_name.
 		:param author_name: si es definido, cambiamos el author_name.
 		:param author_url: si es definido, cambiamos el author_url.
 		'''
+		if self.account.access_token is None:
+			logger.warning("No se ha definido valor de access_token o no se ha establecido una cuenta.")
+			return None
 		try:
 			dictionary = worker.exchange(
 				method='editAccountInfo',
-				access_token=access_token,
+				access_token=self.account.access_token,
 				short_name=short_name,
 				author_name=author_name,
 				author_url=author_url
 			)
-			new_edited_account = elements.Account(None,None,None)
-			new_edited_account.to_import(dictionary)
-			return new_edited_account
+			self.account.to_import(dictionary)
+			return self.account
 		except worker.ErrorWorker as e:
 			logger.error('No puedo editar la cuenta nueva [%s]: %s' % (e.function, e.result))
 			raise e
 
-	def get_account_info(self, access_token, fields=['short_name', 'author_name', 'author_url']):
+	def get_account_info(self, fields=['short_name', 'author_name', 'author_url']):
 		'''Obtiene información de la cuenta.
 
 		Este método permite obtener información de dicha cuenta.
@@ -94,63 +111,70 @@ class Telegraph:
 		- auth_url
 		- page_count
 
-		:param access_token: token de acceso a la cuenta de telegraph.
 		:param fields: tupla que contiene una lista de string con los campos requeridos.
 
 		Ejemplo:
-		>>> get_account_info(access_token=..., fields=('auth_url', 'page_count'))
+		>>> get_account_info(fields=('auth_url', 'page_count'))
 		'''
+		if self.account.access_token is None:
+			logger.warning("No se ha definido valor de access_token o no se ha establecido una cuenta.")
+			return None
 		try:
 			dictionary = worker.exchange(
 				method='getAccountInfo',
-				access_token=access_token,
+				access_token=self.account.access_token,
 				fields=fields
 			)
-			new_got_account = elements.Account(None,None,None)
-			new_got_account.to_import(dictionary)
-			return new_got_account
+			self.account.to_import(dictionary)
+			return self.account
 		except worker.ErrorWorker as e:
 			logger.error('No puedo obtener la información de esta cuenta [%s]: %s' % (e.function, e.result))
 			raise e
 
-	def revoke_access_token(self, access_token):
+	def revoke_access_token(self):
 		'''Cambia el token de una cuenta de Telegraph.
 
 		Este método recibe el anterior token de la cuenta
 		de Telegraph y retorna uno nuevo.
 
-		:param access_token: token antigua de la cuenta de telegraph.
 		'''
+		if self.account.access_token is None:
+			logger.warning("No se ha definido valor de access_token o no se ha establecido una cuenta.")
+			return None
 		try:
 			dictionary = worker.exchange(
 				method='revokeAccessToken',
-				access_token=access_token
+				access_token=sefl.account.access_token
 			)
 			new_token = dictionary['access_token']
 			new_auth_url = dictionary['auth_url']
-			return (new_token, new_auth_url)
+			self.account.access_token = new_token
+			self.account.auth_url = new_auth_url
+			return True # (new_token, new_auth_url)
 		except worker.ErrorWorker as e:
 			logger.error('No puedo revocar token [%s]: %s' % (e.function, e.result))
 			raise e
 
-	def create_page(self, access_token, title, author_name, author_url, content, return_content=False):
+	def create_page(self, title, author_name, author_url, content, return_content=False):
 		'''Crea una nueva página/artículo.
 
 		Permite crear un nuevo artículo, con los datos enviados.
 		Si return_content es `True`, será retornado un objeto
 		`Page`.
 
-		:param access_token: token de acceso a la cuenta de telegraph.
 		:param title: título del artículo.
 		:param author_name: nombre a mostrar del autor.
 		:param author_url: URL del perfil del autor.
 		:param content: lista de objetos `Node`, ver http://telegra.ph/api#Node
 		:param return_content: toma valor `True` para retornar un objeto `Page`. Es `False` por defecto.
 		'''
+		if self.account.access_token is None:
+			logger.warning("No se ha definido valor de access_token o no se ha establecido una cuenta.")
+			return None
 		try:
 			dictionary = worker.exchange(
 				method='createPage',
-				access_token=access_token,
+				access_token=self.account.access_token,
 				title=title,
 				author_name=author_name,
 				author_url=author_url,
@@ -164,12 +188,11 @@ class Telegraph:
 			logger.error('No puedo obtener las vistas [%s]: %s' % (e.function, e.result))
 			raise e
 
-	def edit_page(self, access_token, path, title, content, author_name, author_url, return_content=False):
+	def edit_page(self, path, title, content, author_name, author_url, return_content=False):
 		'''Permite editar un artículo existente.
 
 		Al terminar, retorna un objeto `Page`.
 
-		:param access_token: token de acceso a la cuenta de telegraph.
 		:param path: ruta del artículo.
 		:param title: título del artículo.
 		:param content: contenido del artículo, lista de `Node`, ver http://telegra.ph/api#Node
@@ -177,11 +200,14 @@ class Telegraph:
 		:param author_url: URL del perfil del autor.
 		:param return_content: toma valor `True` para retornar un objeto `Page`. Es `False` por defecto.
 		'''
+		if self.account.access_token is None:
+			logger.warning("No se ha definido valor de access_token o no se ha establecido una cuenta.")
+			return None
 		try:
 			dictionary = worker.exchange_path(
 				method='editPage',
 				path=path,
-				access_token=access_token,
+				access_token=self.account.access_token,
 				title=title,
 				content=content,
 				author_name=author_name,
@@ -214,21 +240,23 @@ class Telegraph:
 			logger.error('No puedo obtener una página [%s]: %s' % (e.function, e.result))
 			raise e
 
-	def get_page_list(self, access_token, offset=0, limit=50):
+	def get_page_list(self, offset=0, limit=50):
 		'''Permite obtener una lista de páginas de dicha cuenta.
 
 		Retorna una lista, ordenada por orden de creación, perteneciente
 		a la cuenta de Telegraph. Lo retorna mediante un objeto
 		`PageList`.
 
-		:param access_token: token de acceso a la cuenta de telegraph.
 		:param offset: número secuencial de la primera página a devolver.
 		:param limit: limites de página a devolver.
 		'''
+		if self.account.access_token is None:
+			logger.warning("No se ha definido valor de access_token o no se ha establecido una cuenta.")
+			return None
 		try:
 			dictionary = worker.exchange(
 				method='getPageList',
-				access_token=access_token,
+				access_token=self.account.access_token,
 				offset=offset,
 				limit=limit
 			)
