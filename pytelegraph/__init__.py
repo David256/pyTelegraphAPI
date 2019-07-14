@@ -20,19 +20,29 @@ import pytelegraph.elements as elements
 import pytelegraph.worker as worker
 
 class Telegraph:
-	"""La clase *Telegraph* define un objeto telegraph con los métodos
-	necesarios para un fácil manejo y administración de publicación minimalista
-	en https://telegra.ph
+	"""La clase *Telegraph* define un objeto telegraph con métodos para un fácil
+	manejo y administración de publicación minimalista en https://telegra.ph
 
 	Para acceder a la documentación de Telegraph,
-	ir al [sitio oficial de Telegraph](https://telegra.ph/api)
+	id al [sitio oficial de Telegraph](https://telegra.ph/api)
 	"""
 
 	def __init__(self, account):
+		"""Crea un nuevo objeto para una `account` proporcionada.
+
+		:param account: cuenta en Telegraph
+		"""
 		self.account = account
 
 	@classmethod
 	def new_from_token(cls, access_token):
+		"""Crea un nuevo objeto Telegraph desde un token.
+
+		Realiza una consulta para descargar toda la información de la cuenta al
+		que pertenece dicho token, para luego, crear un objeto `Account` válido.
+
+		:param access_token: token de acceso.
+		"""
 		fields = [
 			"short_name", "author_name", "author_url",
 			"auth_url", "page_count", "short_name",
@@ -80,17 +90,19 @@ class Telegraph:
 	def edit_account_info(self, short_name=None, author_name=None, author_url=None):
 		"""Edita la información de una cuenta.
 
-		Con este método podéis editar la información de un
-		cuenta en Telegraph, los argumentos que tengan valor
-		`None` no serán enviados, por eso, sólo los valores
-		recibidos serán editados.
+		Para esto, los valores que sean pasados por argumento, serán
+		editados en el perfil de la cuenta de Telegraph. Si no se pasa
+		nada, no se editará nada.
 
 		:param short_name: si es definido, cambiamos el short_name.
 		:param author_name: si es definido, cambiamos el author_name.
 		:param author_url: si es definido, cambiamos el author_url.
 		"""
+		if not any([short_name, author_name, author_url]):
+			logger.warning("No se generarán cambiamos en el perfil por falta de datos")
+			return None
 		if self.account.access_token is None:
-			logger.warning("No se ha definido valor de access_token o no se ha establecido una cuenta.")
+			logger.warning("El access_token es nulo.")
 			return None
 		try:
 			dictionary = worker.exchange(
@@ -107,12 +119,11 @@ class Telegraph:
 			raise e
 
 	def get_account_info(self, fields=["short_name", "author_name", "author_url"]):
-		"""btiene información de la cuenta.
+		"""obtiene información de la cuenta.
 
 		Este método permite obtener información de dicha cuenta.
-		Para esto, tenéis que especificar en la tupla `fields` el
-		campo requerido o los campos requerido. Los campos
-		disponibles son:
+		Para esto, tenéis que especificar en la tupla `fields`
+		los campos requeridos. Los campos disponibles son:
 		- short_name
 		- author_name
 		- author_url
@@ -125,7 +136,7 @@ class Telegraph:
 		>>> get_account_info(fields=("auth_url", "page_count"))
 		"""
 		if self.account.access_token is None:
-			logger.warning("No se ha definido valor de access_token o no se ha establecido una cuenta.")
+			logger.warning("El access_token es nulo.")
 			return None
 		try:
 			dictionary = worker.exchange(
@@ -142,11 +153,12 @@ class Telegraph:
 	def revoke_access_token(self):
 		"""Cambia el token de una cuenta de Telegraph.
 
-		Este método recibe el anterior token de la cuenta
-		de Telegraph y retorna uno nuevo.
+		Este método intercambia el anterior token de la
+		cuenta de Telegraph y genera uno nuevo. También
+		permite cambiar el valor de `auth_url`.
 		"""
 		if self.account.access_token is None:
-			logger.warning("No se ha definido valor de access_token o no se ha establecido una cuenta.")
+			logger.warning("El access_token es nulo.")
 			return None
 		try:
 			dictionary = worker.exchange(
@@ -157,7 +169,7 @@ class Telegraph:
 			new_auth_url = dictionary["auth_url"]
 			self.account.access_token = new_token
 			self.account.auth_url = new_auth_url
-			return True # (new_token, new_auth_url)
+			return True
 		except worker.ErrorWorker as e:
 			logger.error("No puedo revocar token [%s]: %s" % (e.function, e.result))
 			raise e
@@ -166,7 +178,7 @@ class Telegraph:
 		"""Crea una nueva página/artículo.
 
 		Permite crear un nuevo artículo, con los datos enviados.
-		Si return_content es `True`, será retornado un objeto
+		Si `return_content` es `True`, será retornado un objeto
 		`Page`.
 
 		:param title: título del artículo.
@@ -176,7 +188,7 @@ class Telegraph:
 		:param return_content: toma valor `True` para retornar un objeto `Page`. Es `False` por defecto.
 		"""
 		if self.account.access_token is None:
-			logger.warning("No se ha definido valor de access_token o no se ha establecido una cuenta.")
+			logger.warning("El access_token es nulo.")
 			return None
 		try:
 			dictionary = worker.exchange(
@@ -208,7 +220,7 @@ class Telegraph:
 		:param return_content: toma valor `True` para retornar un objeto `Page`. Es `False` por defecto.
 		"""
 		if self.account.access_token is None:
-			logger.warning("No se ha definido valor de access_token o no se ha establecido una cuenta.")
+			logger.warning("El access_token es nulo.")
 			return None
 		try:
 			dictionary = worker.exchange_path(
@@ -229,7 +241,7 @@ class Telegraph:
 			raise e
 
 	def get_page(self, path, return_content=False):
-		"""Retorna un objeto `Page` con la página solicitada.
+		"""Retorna un objeto `Page` de una página solicitada.
 
 		:param path: ruta del artículo.
 		:param return_content: toma valor `True` para retornar un objeto `Page`. Es `False` por defecto.
@@ -258,7 +270,7 @@ class Telegraph:
 		:param limit: limites de página a devolver.
 		"""
 		if self.account.access_token is None:
-			logger.warning("No se ha definido valor de access_token o no se ha establecido una cuenta.")
+			logger.warning("El access_token es nulo.")
 			return None
 		try:
 			dictionary = worker.exchange(
@@ -268,10 +280,6 @@ class Telegraph:
 				limit=limit
 			)
 			new_page_list = elements.PageList(**dictionary)
-			#new_page_list = elements.PageList(
-			#	total_count=dictionary["total_count"],
-			#	pages=dictionary["pages"]
-			#)
 			return new_page_list
 		except worker.ErrorWorker as e:
 			logger.error("No puedo obtener la lista de páginas [%s]: %s" % (e.function, e.result))
