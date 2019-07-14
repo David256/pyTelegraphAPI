@@ -22,10 +22,10 @@ class Element:
 			setattr(self, k, v)
 	
 	def __str__(self):
-		"""Exporta los datos como un diccionario."""
+		"""Exporta los datos en formato json."""
 		new_dict = {}
 		for k,v in self.__dict__.items():
-			if v != None:
+			if not v is None:
 				new_dict[k] = v
 		return json.dumps(new_dict)
 
@@ -50,6 +50,7 @@ class Account(Element):
 
 	@classmethod
 	def new_empty(cls):
+		"""Crea un objeto Account vacío."""
 		return cls("", "", "")
 
 class PageList(Element):
@@ -98,3 +99,8 @@ class Page(Element):
 		self.content = content
 		self.views = views
 		self.can_edit = can_edit
+
+	@classmethod
+	def new_empty(cls):
+		"""Crea un objeto Page en blanco."""
+		return cls(None, None, None, None)

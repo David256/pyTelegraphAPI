@@ -200,7 +200,7 @@ class Telegraph:
 				content=content,
 				return_content=return_content
 			)
-			new_page = elements.Page(None,None,None,None)
+			new_page = elements.Page.new_empty()
 			new_page.to_import(dictionary)
 			return new_page
 		except worker.ErrorWorker as e:
