@@ -1,42 +1,50 @@
 # PyTelegraphAPI
-Éste es una API para [Telegra.ph](https://telegra.ph/api) escrita en Python 3. En su clase `Telegraph` se define diferentes funciones para crear y editar cuentas de usuario de [Telegra.ph](https://telegra.ph); permitiendo también la edición, publicación y obtención de estadística de las publicaciones publicadas.
+Éste es una API para [Telegra.ph](https://telegra.ph/api) escrita en Python 3. En la clase `Telegraph` se define diferentes funciones para crear y editar la cuenta de usuario de [Telegra.ph](https://telegra.ph); permitiendo la publicación y edición de artículos, como también la obtención de estadística de los mismos.
 
 ## Instalación
-Por el momento, la única forma de usarlo es copiar el directorio __pytelegraph__ al espacio de trabajo. Pronto lo haré más fácil y si me envías un _pull request_..., ¡mejor!
+Copia y pega el directorio **pytelegraph** al espacio de trabajo. Pronto lo haré más fácil, y si me envías un _pull request_..., ¡mejor!
 
 ## Uso
-Lo primero en hacer, es crear un objeto de la clase `Telegraph`:
+Puedes crear un objeto `Telegraph` desde un `token`, o pedir crear una cuenta nueva.
+
+Para crear un objeto apartir de una cuenta existente, puedes crear un objeto `Account` y pasarlo al constructor de la clase `Telegraph`, o usar su método de clase `.new_from_token(access_token)`.
+
 ```python
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
 import pytelegraph
 
-# creamos un objeto Telegraph:
-my_telegraph = pytelegram.Telegraph()
+# un token cualquiera
+my_token = "xcvbnm123456789es3un3ejemplo3xd"
+
+# un objeto Account que tenías ya preparado...
+account = get_account_from_anywhere()
+
+# creamos un objeto Telegraph desde Account:
+my_telegraph = pytelegram.Telegraph(account)
+
+# creamos un objeto Telegraph desde token:
+my_telegraph = pytelegram.Telegraph.new_from_token(token)
 ```
 
-Para crear una cuenta nueva:
+Por otro lado, para crear una cuenta nueva:
+
 ```python
-my_telegraph.create_account(
+pytelegraph.Telegraph.new_from_new_account(
     short_name="Daniela",
     author_name="Daniela Peralta",
-    author_url="https://t.me/DanielaPeralta" # Espero que nadie, ahora, se cree esta cuenta y me toque cambiar este ejemplo :v
+    author_url="https://t.me/DanielaPeralta" # Espero que nadie... se cree esta cuenta y me toque cambiar este ejemplo :v
 )
-
-# listo, ahora en los futuros métodos, cuando necesitéis el `access_token`,
-# podéis usar el de la última cuenta creada con: 
-last_access_token = my_telegraph.access_token
 ```
 
-Si tenéis problema con la visualización por culpa de los logs, podéis quitarlo cambiando el siguiente código:
+Si tenéis problema con la visualización por culpa de los logs, podéis quitarlo:
+
 ```python
-# dentro de : ./pytelegraph/__init__.py
-# línea 13. Cambiad:
-logger.setLevel(logging.INFO)
-# por:
-logger.setLevel(logging.ERROR)
-# ahora, sólo se mostrará logs si sucede un error grave
+import logging
+import pytelegraph
+
+pytelegraph.logger.setLevel(logging.ERROR)
 ```
 
 Otra cosa, ¡Hay documentación en el código! (y en [Telegra.ph](https://telegra.ph/api))
