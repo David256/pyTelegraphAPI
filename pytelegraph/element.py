@@ -27,7 +27,7 @@ class Element:
 		for k,v in self.__dict__.items():
 			if not v is None:
 				new_dict[k] = v
-		return json.dumps(new_dict)
+		return json.dumps(new_dict, default=lambda o: o())
 
 class Account(Element):
 

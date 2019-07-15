@@ -18,6 +18,7 @@ logger.setLevel(logging.INFO)
 
 import pytelegraph.element as element
 import pytelegraph.worker as worker
+import pytelegraph.node as node
 
 class Telegraph:
 	"""La clase *Telegraph* define un objeto telegraph con métodos para un fácil
@@ -206,7 +207,7 @@ class Telegraph:
 		:param title: título del artículo.
 		:param author_name: nombre a mostrar del autor.
 		:param author_url: URL del perfil del autor.
-		:param content: lista de objetos `Node`, ver http://telegra.ph/api#Node
+		:param content: lista de objetos `Node`.
 		:param return_content: toma valor `True` para retornar un objeto `Page`. Es `False` por defecto.
 		"""
 		if self.account.access_token is None:
@@ -273,6 +274,10 @@ class Telegraph:
 				return_content=return_content)
 			new_got_page = element.Page.new_empty()
 			new_got_page.to_import(dictionary)
+			new_content = list()
+			for item in new_got_page.content:
+				new_content.append(node.NodeElement.new_from(item))
+			new_got_page.content = new_content
 			return new_got_page
 		except worker.ErrorWorker as e:
 			logger.error("No puedo obtener una página [%s]: %s" % (e.function, e.result))
